@@ -14,7 +14,7 @@ class ChatroomView extends GetView<ChatroomController> {
         backgroundColor: Colors.red,
         leadingWidth: 70,
         leading: InkWell(
-          onTap: () {},
+          onTap: () => Get.back(),
           borderRadius: BorderRadius.circular(100),
           child: Row(
             children: [
@@ -67,11 +67,11 @@ class ChatroomView extends GetView<ChatroomController> {
                   child: Container(
                     child: TextField(
                       decoration: InputDecoration(
-                        prefixIcon: IconButton(
-                            onPressed: () {
-                              controller.isShowEmoji.toggle();
-                            },
-                            icon: Icon(Icons.emoji_emotions_outlined)),
+                        // prefixIcon: IconButton(
+                        //     onPressed: () {
+                        //       controller.isShowEmoji.toggle();
+                        //     },
+                        //     icon: Icon(Icons.emoji_emotions_outlined)),
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(100)),
                       ),

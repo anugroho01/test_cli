@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
+import 'package:test_cli/app/controllers/auth_controller.dart';
 
 import '../controllers/login_controller.dart';
 
 class LoginView extends GetView<LoginController> {
-  const LoginView({Key? key}) : super(key: key);
+  final authC = Get.find<AuthController>();
+  //const LoginView({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,7 +28,7 @@ class LoginView extends GetView<LoginController> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 9),
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () => authC.login(),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [

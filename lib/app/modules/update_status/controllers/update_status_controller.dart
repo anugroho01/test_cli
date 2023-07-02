@@ -1,23 +1,21 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class UpdateStatusController extends GetxController {
   //TODO: Implement UpdateStatusController
 
-  final count = 0.obs;
-  @override
-  void onInit() {
-    super.onInit();
-  }
+  late TextEditingController statusC;
 
   @override
-  void onReady() {
-    super.onReady();
+  void onInit() {
+    statusC = TextEditingController();
   }
 
   @override
   void onClose() {
+    // TODO: implement onClose
+
+    statusC.dispose();
     super.onClose();
   }
-
-  void increment() => count.value++;
 }
