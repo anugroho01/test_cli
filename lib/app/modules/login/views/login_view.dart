@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
-import 'package:test_cli/app/controllers/auth_controller.dart';
+import 'package:ChatApp/app/controllers/auth_controller.dart';
 
 import '../controllers/login_controller.dart';
 

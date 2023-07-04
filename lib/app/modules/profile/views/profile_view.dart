@@ -2,8 +2,8 @@ import 'package:avatar_glow/avatar_glow.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
-import 'package:test_cli/app/controllers/auth_controller.dart';
-import 'package:test_cli/app/routes/app_pages.dart';
+import 'package:ChatApp/app/controllers/auth_controller.dart';
+import 'package:ChatApp/app/routes/app_pages.dart';
 
 import '../controllers/profile_controller.dart';
 
@@ -42,19 +42,21 @@ class ProfileView extends GetView<ProfileController> {
                   child: Container(
                     width: 175,
                     height: 175,
-                    decoration: BoxDecoration(
+                    child: ClipRRect(
                         borderRadius: BorderRadius.circular(100),
-                        image: DecorationImage(
-                            image: AssetImage("assets/logo/noimage.png"),
-                            fit: BoxFit.cover)),
+                        child: authC.user.photoUrl == "noimage"
+                            ? Image.asset("assets/logo/noimage.png",
+                                fit: BoxFit.cover)
+                            : Image.network(authC.user.photoUrl!,
+                                fit: BoxFit.cover)),
                   ),
                 ),
                 Text(
-                  "Nama",
+                  "${authC.user.name}",
                   style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
                 ),
-                Text("email@gmail.com",
+                Text("${authC.user.email}",
                     style: TextStyle(fontSize: 15),
                     textAlign: TextAlign.center),
               ],

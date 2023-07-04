@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:introduction_screen/introduction_screen.dart';
 import 'package:lottie/lottie.dart';
-import 'package:test_cli/app/routes/app_pages.dart';
+import 'package:ChatApp/app/routes/app_pages.dart';
 
 import '../controllers/intoduction_controller.dart';
 
