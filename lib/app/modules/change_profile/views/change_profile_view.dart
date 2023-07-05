@@ -1,3 +1,4 @@
+import 'package:ChatApp/app/controllers/auth_controller.dart';
 import 'package:avatar_glow/avatar_glow.dart';
 import 'package:flutter/material.dart';
 
@@ -6,9 +7,13 @@ import 'package:get/get.dart';
 import '../controllers/change_profile_controller.dart';
 
 class ChangeProfileView extends GetView<ChangeProfileController> {
-  const ChangeProfileView({Key? key}) : super(key: key);
+  final authC = Get.find<AuthController>();
+  //const ChangeProfileView({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
+    controller.emailC.text = authC.user.value.email!;
+    controller.namaC.text = authC.user.value.name!;
+    controller.statusC.text = authC.user.value.status!;
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -16,7 +21,14 @@ class ChangeProfileView extends GetView<ChangeProfileController> {
         title: const Text('Change Profile'),
         centerTitle: true,
         backgroundColor: Colors.red,
-        actions: [IconButton(onPressed: () {}, icon: Icon(Icons.save))],
+        actions: [
+          IconButton(
+              onPressed: () {
+                authC.changeprofile(
+                    controller.namaC.text, controller.statusC.text);
+              },
+              icon: Icon(Icons.save))
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
@@ -27,17 +39,22 @@ class ChangeProfileView extends GetView<ChangeProfileController> {
               glowColor: Colors.red,
               duration: Duration(seconds: 2),
               child: Container(
-                width: 100,
-                height: 100,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(100),
-                    image: DecorationImage(
-                        image: AssetImage("assets/logo/noimage.png"),
-                        fit: BoxFit.cover)),
-              ),
+                  width: 100,
+                  height: 100,
+                  child: Obx(
+                    () => ClipRRect(
+                        borderRadius: BorderRadius.circular(100),
+                        child: authC.user.value.photoUrl == "noimage"
+                            ? Image.asset("assets/logo/noimage.png",
+                                fit: BoxFit.cover)
+                            : Image.network(authC.user.value.photoUrl!,
+                                fit: BoxFit.cover)),
+                  )),
             ),
             TextField(
               controller: controller.emailC,
+              readOnly: true,
+              textInputAction: TextInputAction.next,
               cursorColor: Colors.black,
               decoration: InputDecoration(
                   label: Text("Email"),
@@ -55,6 +72,7 @@ class ChangeProfileView extends GetView<ChangeProfileController> {
             ),
             TextField(
               controller: controller.namaC,
+              textInputAction: TextInputAction.next,
               cursorColor: Colors.black,
               decoration: InputDecoration(
                   label: Text("Nama"),
@@ -72,6 +90,11 @@ class ChangeProfileView extends GetView<ChangeProfileController> {
             ),
             TextField(
               controller: controller.statusC,
+              textInputAction: TextInputAction.done,
+              onEditingComplete: () {
+                authC.changeprofile(
+                    controller.namaC.text, controller.statusC.text);
+              },
               cursorColor: Colors.black,
               decoration: InputDecoration(
                   label: Text("Status"),
@@ -99,7 +122,10 @@ class ChangeProfileView extends GetView<ChangeProfileController> {
             ),
             Container(
                 child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      authC.changeprofile(
+                          controller.namaC.text, controller.statusC.text);
+                    },
                     child: Text("Update"),
                     style: ElevatedButton.styleFrom(
                         primary: Colors.red,
