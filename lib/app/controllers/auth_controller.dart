@@ -1,4 +1,4 @@
-import 'package:ChatApp/app/data/models/user_model.dart';
+import 'package:ChatApp/app/data/models/users_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
@@ -17,7 +17,7 @@ class AuthController extends GetxController {
   UserCredential? userCredential;
   FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  var user = UserModel().obs;
+  var user = UserModel(keyName: null).obs;
 
   Future<void> firstInitialized() async {
     await autoLogin().then((value) {
@@ -63,7 +63,7 @@ class AuthController extends GetxController {
         //input ke database firebase
         CollectionReference users = firestore.collection('users');
 
-        users.doc(_usergoogle?.email).update({
+        await users.doc(_usergoogle?.email).update({
           "lastSign":
               userCredential?.user?.metadata.lastSignInTime?.toIso8601String(),
           "updateTime": DateTime.now().toIso8601String()
@@ -71,16 +71,19 @@ class AuthController extends GetxController {
         final currUser = await users.doc(_usergoogle?.email).get();
         final currUserddata = currUser.data() as Map<String, dynamic>;
 
-        user(UserModel(
-          uid: currUserddata["uid"],
-          name: currUserddata["name"],
-          email: currUserddata["email"],
-          status: currUserddata["status"],
-          photoUrl: currUserddata["photoUrl"],
-          createAt: currUserddata["createdAt"],
-          lastSign: currUserddata["lastSign"],
-          updateTime: currUserddata["updateTime"],
-        ));
+        user(UserModel.fromJson(currUserddata));
+
+        // user(UserModel(
+        //   uid: currUserddata["uid"],
+        //   name: currUserddata["name"],
+        //   keyName: currUserddata["keyName"],
+        //   email: currUserddata["email"],
+        //   status: currUserddata["status"],
+        //   photoUrl: currUserddata["photoUrl"],
+        //   createAt: currUserddata["createdAt"],
+        //   lastSign: currUserddata["lastSign"],
+        //   updateTime: currUserddata["updateTime"],
+        // ));
         return true;
       }
       return false;
@@ -125,9 +128,10 @@ class AuthController extends GetxController {
         ///cek user sdh pernah login apa belum
         final cekuser = await users.doc(_usergoogle!.email).get();
         if (cekuser.data() == null) {
-          users.doc(_usergoogle?.email).set({
+          await users.doc(_usergoogle?.email).set({
             "uid": userCredential?.user?.uid,
             "name": _usergoogle?.displayName,
+            "keyName": _usergoogle?.displayName?.substring(0, 1).toUpperCase(),
             "email": _usergoogle?.email,
             "photoUrl": _usergoogle?.photoUrl ?? 'noimage',
             "status": "",
@@ -135,10 +139,11 @@ class AuthController extends GetxController {
                 userCredential?.user?.metadata.creationTime?.toIso8601String(),
             "lastSign": userCredential?.user?.metadata.lastSignInTime
                 ?.toIso8601String(),
-            "updateTime": DateTime.now().toIso8601String()
+            "updateTime": DateTime.now().toIso8601String(),
+            "chats": []
           });
         } else {
-          users.doc(_usergoogle?.email).update({
+          await users.doc(_usergoogle?.email).update({
             "lastSign": userCredential?.user?.metadata.lastSignInTime
                 ?.toIso8601String(),
             "updateTime": DateTime.now().toIso8601String()
@@ -148,16 +153,19 @@ class AuthController extends GetxController {
         final currUser = await users.doc(_usergoogle?.email).get();
         final currUserddata = currUser.data() as Map<String, dynamic>;
 
-        user(UserModel(
-          uid: currUserddata["uid"],
-          name: currUserddata["name"],
-          email: currUserddata["email"],
-          status: currUserddata["status"],
-          photoUrl: currUserddata["photoUrl"],
-          createAt: currUserddata["createdAt"],
-          lastSign: currUserddata["lastSign"],
-          updateTime: currUserddata["updateTime"],
-        ));
+        user(UserModel.fromJson(currUserddata));
+
+        // user(UserModel(
+        //     uid: currUserddata["uid"],
+        //     name: currUserddata["name"],
+        //     keyName: currUserddata["keyName"],
+        //     email: currUserddata["email"],
+        //     status: currUserddata["status"],
+        //     photoUrl: currUserddata["photoUrl"],
+        //     createAt: currUserddata["createdAt"],
+        //     lastSign: currUserddata["lastSign"],
+        //     updateTime: currUserddata["updateTime"],
+        //     chats: currUserddata["chats"]));
 
         isAuth.value = true;
         Get.offAllNamed(Routes.HOME);
@@ -214,6 +222,7 @@ class AuthController extends GetxController {
           userCredential?.user?.metadata.lastSignInTime?.toIso8601String(),
       "updateTime": tanggal,
       "name": name,
+      "keyName": name.substring(0, 1).toUpperCase(),
       "status": status
     });
 
@@ -221,6 +230,7 @@ class AuthController extends GetxController {
 
     user.update((user) {
       user!.name = name;
+      user.keyName = name.substring(0, 1).toUpperCase();
       user.status = status;
       user.lastSign =
           userCredential?.user?.metadata.lastSignInTime?.toIso8601String();
@@ -232,5 +242,100 @@ class AuthController extends GetxController {
     user.refresh();
 
     Get.defaultDialog(title: "sukses", middleText: "update profile berhasil");
+  }
+
+  void tambahKoneksi(String emailTo) async {
+    bool stskoneksiBaru = false;
+    String tanggal = DateTime.now().toIso8601String();
+    var chat_id;
+    CollectionReference chats = firestore.collection("chats");
+    CollectionReference users = firestore.collection("users");
+
+    final cekUser = await users.doc(_usergoogle!.email).get();
+    final cekChat = (cekUser.data() as Map<String, dynamic>)["chats"] as List;
+
+    if (cekChat.length > 0) {
+      //sudah pernah chat (semua orang)
+
+      cekChat.forEach((element) {
+        //cek sdh pernah chat dengan =>emailTo ?
+        if (element["connection"] == emailTo) {
+          chat_id = element["chat_id"];
+          print(element["connection"]);
+        }
+      });
+
+      //jika sdh pernah chat =>emailTo
+      if (chat_id != null) {
+        stskoneksiBaru = false;
+      } else {
+        stskoneksiBaru = true;
+      }
+    } else {
+      stskoneksiBaru = true;
+    }
+
+    if (stskoneksiBaru) {
+// belum pernah chat
+
+//cek dulu apakah emailTo pernah DICHAT?
+// 1. jika ada
+//2.jika belum
+      final chatsDoc = await chats.where("connection", whereIn: [
+        [emailTo, _usergoogle!.email],
+        [_usergoogle!.email, emailTo]
+      ]).get();
+
+      if (chatsDoc.docs.length > 0) {
+        //sudah pernah chat antar mereka berdua
+        final chatIdData = chatsDoc.docs[0].id;
+        final chatData = chatsDoc.docs[0].data() as Map<String, dynamic>;
+
+        cekChat.add({
+          "connection": emailTo,
+          "chat_id": chatIdData,
+          "lastTime": chatData["lastTime"]
+        });
+        await users.doc(_usergoogle!.email).update({
+          "chats": [cekChat]
+        });
+        user.update((user) {
+          user!.chats = cekChat as List<ChatUser>;
+        });
+        chat_id = chatIdData;
+        user.refresh();
+      } else {
+        // jika belum pernah chat
+        final newChatDoc = await chats.add({
+          "connection": [
+            _usergoogle!.email,
+            emailTo,
+          ],
+          "total_chat": 0,
+          "total_read": 0,
+          "total_unread": 0,
+          "chat": [],
+          "lastTime": tanggal
+        });
+
+        cekChat.add({
+          "connection": emailTo,
+          "chat_id": newChatDoc.id,
+          "lastTime": tanggal
+        });
+
+        await users.doc(_usergoogle!.email).update({"chats": cekChat});
+
+        user.update((user) {
+          user!.chats = cekChat as List<ChatUser>;
+        });
+        chat_id = newChatDoc.id;
+        user.refresh();
+      }
+
+      //Get.toNamed(Routes.CHATROOM);
+    }
+    print(chat_id);
+    Get.toNamed(Routes.CHATROOM, arguments: chat_id);
   }
 }

@@ -14,7 +14,7 @@ class SearchpageController extends GetxController {
 
   FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  void cariOrang(String data) async {
+  void cariOrang(String data, String email) async {
     //print("Cari $data");
 
     if (data.length == 0) {
@@ -26,9 +26,10 @@ class SearchpageController extends GetxController {
 
       if (awalan.length == 0 && data.length == 1) {
         //jalan saat ketik huruf pertama
-        CollectionReference karyawan = await firestore.collection("personels");
+        CollectionReference karyawan = await firestore.collection("users");
         final KarResult = await karyawan
-            .where("KeyName", isEqualTo: data.substring(0, 1).toUpperCase())
+            .where("keyName", isEqualTo: data.substring(0, 1).toUpperCase())
+            .where("email", isNotEqualTo: email)
             .get();
 
         print(KarResult.docs.length);

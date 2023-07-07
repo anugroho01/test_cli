@@ -1,3 +1,4 @@
+import 'package:ChatApp/app/controllers/auth_controller.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
@@ -8,6 +9,7 @@ import '../controllers/searchpage_controller.dart';
 
 class SearchpageView extends GetView<SearchpageController> {
   SearchpageView({Key? key}) : super(key: key);
+  final authC = Get.find<AuthController>();
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +24,8 @@ class SearchpageView extends GetView<SearchpageController> {
                   child: Align(
                     alignment: Alignment.bottomCenter,
                     child: TextField(
-                      onChanged: (value) => controller.cariOrang(value),
+                      onChanged: (value) =>
+                          controller.cariOrang(value, authC.user.value.email!),
                       controller: controller.searchC,
                       cursorColor: Colors.red,
                       decoration: InputDecoration(
@@ -58,13 +61,25 @@ class SearchpageView extends GetView<SearchpageController> {
                   padding: EdgeInsets.zero,
                   itemCount: controller.tempSearch.length,
                   itemBuilder: (contex, index) => ListTile(
-                        onTap: () => Get.toNamed(Routes.CHATROOM),
+                        contentPadding:
+                            EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                        onTap: () => authC.tambahKoneksi(
+                            controller.tempSearch[index]["email"]),
                         leading: CircleAvatar(
                           radius: 25,
                           backgroundColor: Colors.grey,
-                          child: Image.asset(
-                            "assets/logo/noimage.png",
-                            fit: BoxFit.cover,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(100),
+                            child: controller.tempSearch[index]["photoUrl"] ==
+                                    "noimage"
+                                ? Image.asset(
+                                    "assets/logo/noimage.png",
+                                    fit: BoxFit.cover,
+                                  )
+                                : Image.network(
+                                    controller.tempSearch[index]["photoUrl"],
+                                    fit: BoxFit.cover,
+                                  ),
                           ),
                         ),
                         title: Text(
@@ -75,7 +90,10 @@ class SearchpageView extends GetView<SearchpageController> {
                           "${controller.tempSearch[index]["email"]}",
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
-                        trailing: Chip(label: Text("Message")),
+                        trailing: GestureDetector(
+                            onTap: () => authC.tambahKoneksi(
+                                controller.tempSearch[index]["email"]),
+                            child: Chip(label: Text("Message"))),
                       )),
         ));
   }

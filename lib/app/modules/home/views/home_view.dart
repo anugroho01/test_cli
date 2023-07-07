@@ -70,7 +70,7 @@ class HomeView extends GetView<HomeController> {
               child: ListView.builder(
                   padding: EdgeInsets.zero,
                   itemCount: 11,
-                  itemBuilder: (contrx, index) => myChats[index]))
+                  itemBuilder: (contx, index) => myChats[index]))
         ],
       ),
       floatingActionButton: FloatingActionButton(

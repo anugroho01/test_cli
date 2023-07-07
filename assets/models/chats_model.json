@@ -1,0 +1,22 @@
+{
+    "connections": [
+        "ariska.nugroho@mu.co.id",
+        "asifahsiti@gmail.com"
+    ],
+    "chat": [
+        {
+            "pengirim": "ariska.nugroho@mu.co.id",
+            "penerima": "asifahsiti@gmail.com",
+            "pesan": "Halo Nda ?",
+            "time": "2021-08-25T13:28:59.748721",
+            "isRead":true
+        },
+        {
+            "pengirim": "asifahsiti@gmail.com",
+            "penerima": "sandikha.rahardi@gmail.com",
+            "pesan": "nganu yo?",
+            "time": "2021-08-25T13:29:02.748721",
+            "isRead":false
+        }
+    ]
+}
