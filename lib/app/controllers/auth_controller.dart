@@ -294,7 +294,8 @@ class AuthController extends GetxController {
         cekChat.add({
           "connection": emailTo,
           "chat_id": chatIdData,
-          "lastTime": chatData["lastTime"]
+          "lastTime": chatData["lastTime"],
+          "total_unread": 0,
         });
         await users.doc(_usergoogle!.email).update({
           "chats": [cekChat]
@@ -311,17 +312,14 @@ class AuthController extends GetxController {
             _usergoogle!.email,
             emailTo,
           ],
-          "total_chat": 0,
-          "total_read": 0,
-          "total_unread": 0,
           "chat": [],
-          "lastTime": tanggal
         });
 
         cekChat.add({
           "connection": emailTo,
           "chat_id": newChatDoc.id,
-          "lastTime": tanggal
+          "lastTime": tanggal,
+          "total_unread": 0
         });
 
         await users.doc(_usergoogle!.email).update({"chats": cekChat});

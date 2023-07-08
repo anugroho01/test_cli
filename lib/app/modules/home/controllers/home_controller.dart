@@ -4,14 +4,15 @@ import 'package:get/get.dart';
 class HomeController extends GetxController {
   //TODO: Implement HomeController
 
-  final listChat = [].obs;
+  // final listChat = [].obs;
 
   FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  void cariTeman(String idChat) async {
-    CollectionReference chats = await firestore.collection("chats");
-    final chatResult = await chats.where("chat_id", isEqualTo: idChat);
+  Stream<DocumentSnapshot<Map<String, dynamic>>> chatStream(String email) {
+    return firestore.collection("users").doc(email).snapshots();
+  }
 
-    print(chatResult);
+  Stream<DocumentSnapshot<Map<String, dynamic>>> friendStream(String email) {
+    return firestore.collection("users").doc(email).snapshots();
   }
 }

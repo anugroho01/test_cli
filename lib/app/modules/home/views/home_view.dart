@@ -1,35 +1,16 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
 
+import '../../../controllers/auth_controller.dart';
 import '../../../routes/app_pages.dart';
 import '../controllers/home_controller.dart';
 
 class HomeView extends GetView<HomeController> {
   HomeView({Key? key}) : super(key: key);
-  final List<Widget> myChats = List.generate(
-    11,
-    (index) => ListTile(
-      onTap: () => Get.toNamed(Routes.CHATROOM),
-      leading: CircleAvatar(
-        radius: 25,
-        backgroundColor: Colors.grey,
-        child: Image.asset(
-          "assets/logo/noimage.png",
-          fit: BoxFit.cover,
-        ),
-      ),
-      title: Text(
-        "nama ke ${index + 1}",
-        style: TextStyle(fontWeight: FontWeight.bold),
-      ),
-      subtitle: Text(
-        "status ke ${index + 1}",
-        style: TextStyle(fontWeight: FontWeight.bold),
-      ),
-      trailing: Chip(label: Text("1")),
-    ),
-  ).reversed.toList();
+  final authC = Get.find<AuthController>();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -67,10 +48,115 @@ class HomeView extends GetView<HomeController> {
             ),
           ),
           Expanded(
-              child: ListView.builder(
-                  padding: EdgeInsets.zero,
-                  itemCount: 11,
-                  itemBuilder: (contx, index) => myChats[index]))
+            child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+              stream: controller.chatStream(authC.user.value.email!),
+              builder: (context, snapshot1) {
+                if (snapshot1.connectionState == ConnectionState.active) {
+                  var allChats = (snapshot1.data!.data()
+                      as Map<String, dynamic>)["chats"] as List;
+                  print(allChats.length);
+
+                  return ListView.builder(
+                      padding: EdgeInsets.zero,
+                      itemCount: allChats.length,
+                      itemBuilder: (contex, index) {
+                        return StreamBuilder<
+                                DocumentSnapshot<Map<String, dynamic>>>(
+                            stream: controller
+                                .friendStream(allChats[index]["connection"]),
+                            builder: (contex, snapshot2) {
+                              if (snapshot2.connectionState ==
+                                  ConnectionState.active) {
+                                var dataorg = snapshot2.data!.data();
+                                return dataorg!["status"] == ""
+                                    ? ListTile(
+                                        onTap: () =>
+                                            Get.toNamed(Routes.CHATROOM),
+                                        leading: CircleAvatar(
+                                            radius: 25,
+                                            backgroundColor: Colors.grey,
+                                            child: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(100),
+                                              child: dataorg!["photoUrl"] ==
+                                                      'noimage'
+                                                  ? Image.asset(
+                                                      "assets/logo/noimage.png",
+                                                      fit: BoxFit.cover,
+                                                    )
+                                                  : Image.network(
+                                                      "${dataorg["photoUrl"]}",
+                                                      fit: BoxFit.cover,
+                                                    ),
+                                            )),
+                                        title: Text(
+                                          " ${dataorg["name"]}",
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                        trailing: allChats[index]
+                                                    ["total_unread"] ==
+                                                0
+                                            ? SizedBox()
+                                            : Chip(
+                                                label: Text(
+                                                    "${allChats[index]["total_unread"]}")),
+                                      )
+                                    : ListTile(
+                                        onTap: () =>
+                                            Get.toNamed(Routes.CHATROOM),
+                                        leading: CircleAvatar(
+                                            radius: 25,
+                                            backgroundColor: Colors.grey,
+                                            child: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(100),
+                                              child: dataorg!["photoUrl"] ==
+                                                      'noimage'
+                                                  ? Image.asset(
+                                                      "assets/logo/noimage.png",
+                                                      fit: BoxFit.cover,
+                                                    )
+                                                  : Image.network(
+                                                      "${dataorg["photoUrl"]}",
+                                                      fit: BoxFit.cover,
+                                                    ),
+                                            )),
+                                        title: Text(
+                                          " ${dataorg["name"]}",
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                        subtitle: Text(
+                                          "${dataorg["status"]}",
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                        trailing: allChats[index]
+                                                    ["total_unread"] ==
+                                                0
+                                            ? SizedBox()
+                                            : Chip(
+                                                label: Text(
+                                                    "${allChats[index]["total_unread"]}")),
+                                      );
+                              }
+                              return Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            });
+                      });
+                }
+                return Center(
+                  child: CircularProgressIndicator(),
+                );
+              },
+            ),
+            // child: ListView.builder(
+            //     padding: EdgeInsets.zero,
+            //     itemCount: 11,
+            //     itemBuilder: (contx, index) => myChats[index])
+          )
         ],
       ),
       floatingActionButton: FloatingActionButton(
